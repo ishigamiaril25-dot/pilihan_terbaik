@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>🌱 Simulasi Sekolah Hijau - Versi Lengkap</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #2e7d32;
+  margin-bottom: 10px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+.subtitle {
+  text-align: center;
+  color: #4caf50;
+  margin-bottom: 30px;
+  font-style: italic;
+}
+.stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.stat {
+  background: linear-gradient(145deg, #ffffff, #f1f8e9);
+  padding: 15px;
+  border-radius: 15px;
+  width: 22%;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+  margin: 5px;
+}
+.stat:hover {
+  transform: translateY(-5px);
+}
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+.card {
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  padding: 25px;
+  border-radius: 20px;
+  margin-top: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.question {
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  color: #333;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #4caf50, #45a049);
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(76,175,80,0.3);
+}
+button:hover {
+  background: linear-gradient(145deg, #45a049, #388e3c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(76,175,80,0.4);
+}
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+.progress {
+  background: #e0e0e0;
+  height: 8px;
+  border-radius: 4px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50, #81c784);
+  width: 0%;
+  transition: width 0.5s;
+}
+.end {
+  text-align: center;
+  font-size: 22px;
+  margin-top: 30px;
+  padding: 30px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.end-title {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+.end-desc {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.ending-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+.restart-btn {
+  max-width: 300px;
+  margin: 0 auto;
+}
+@media (max-width: 600px) {
+  .stat { width: 45%; }
+  .question { font-size: 16px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>🌱 Simulasi Sekolah Hijau</h1>
+  <p class="subtitle">Kelola sekolah ramah lingkungan dengan bijak!</p>
+
+  <div class="progress">
+    <div class="progress-bar" id="progress"></div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">🌍 Lingkungan</div>
+      <div class="stat-value" id="env">70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">💰 Dana</div>
+      <div class="stat-value" id="money">70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">😊 Siswa</div>
+      <div class="stat-value" id="happy">70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">📚 Reputasi</div>
+      <div class="stat-value" id="reputation">70</div>
+    </div>
+  </div>
+
+  <div class="card" id="gameCard">
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+  </div>
+
+  <div class="end" id="end" style="display: none;"></div>
+</div>
+
+<script>
+let env = 70;
+let money = 70;
+let happy = 70;
+let reputation = 70;
+let step = 0;
+
+const events = [
+  {
+    q: "Sekolah ingin mengurangi sampah plastik. Apa yang dilakukan?",
+    options: [
+      { text: "Larangan total plastik sekali pakai", effect: [15, -10, -5, 10] },
+      { text: "Ganti sedotan plastik dengan bambu", effect: [10, -5, 5, 5] },
+      { text: "Kampanye daur ulang intensif", effect: [8, 0, 10, 8] },
+      { text: "Biarkan seperti biasa", effect: [-10, 0, 0, -5] },
+      { text: "Beli kantong kain untuk siswa", effect: [5, -15, 8, 3] }
+    ]
+  },
+  {
+    q: "Lampu dan AC sekolah boros listrik. Solusi terbaik?",
+    options: [
+      { text: "Ganti semua lampu LED + panel surya", effect: [12, -25, 0, 15] },
+      { text: "Hanya ganti lampu LED", effect: [8, -12, 2, 5] },
+      { text: "Matikan lampu saat tidak dipakai", effect: [5, 0, -3, 3] },
+      { text: "Tidak ada perubahan", effect: [-8, 0, 0, -5] },
+      { text: "Audit energi oleh ahli", effect: [10, -8, 5, 10] }
+    ]
+  },
+  {
+    q: "Siswa ingin kantin ramah lingkungan. Pilihan?",
+    options: [
+      { text: "Kantin zero waste lengkap", effect: [15, -15, 12, 12] },
+      { text: "Kantin bebas plastik", effect: [10, -8, 8, 8] },
+      { text: "Menu vegetarian 3x seminggu", effect: [12, -5, 5, 10] },
+      { text: "Kantin tetap biasa", effect: [-5, 0, -8, -5] },
+      { text: "Kerjasama dengan petani lokal", effect: [8, -3, 10, 12] }
+    ]
+  },
+  {
+    q: "Halaman sekolah gundul dan panas. Solusinya?",
+    options: [
+      { text: "Tanam 100 pohon + taman vertikal", effect: [20, -30, 5, 15] },
+      { text: "Buat kebun sekolah siswa", effect: [12, -10, 15, 10] },
+      { text: "Hanya rumput sintetis", effect: [-5, -5, 5, -3] },
+      { text: "Tidak ada perubahan", effect: [-10, 0, -5, -8] },
+      { text: "Pohon peneduh + tempat duduk", effect: [15, -15, 12, 12] }
+    ]
+  },
+  {
+    q: "Air sekolah boros. Bagaimana menghemat?",
+    options: [
+      { text: "Toilet hemat air + penampung hujan", effect: [15, -20, 3, 12] },
+      { text: "Sensor keran otomatis", effect: [10, -12, 5, 8] },
+      { text: "Edukasi hemat air", effect: [5, 0, 10, 5] },
+      { text: "Tidak ada perubahan", effect: [-8, 0, -3, -5] },
+      { text: "Recycle air cuci tangan", effect: [12, -15, 2, 10] }
+    ]
+  },
+  {
+    q: "Transportasi siswa banyak kendaraan bermotor. Solusi?",
+    options: [
+      { text: "Shuttle sekolah listrik", effect: [18, -35, 8, 18] },
+      { text: "Jalur sepeda + parkir aman", effect: [12, -10, 12, 10] },
+      { text: "Kampanye jalan kaki/car free day", effect: [8, 0, 15, 8] },
+      { text: "Biarkan seperti biasa", effect: [-12, 0, -5, -10] },
+      { text: "Bus antar jemput gratis", effect: [10, -20, 10, 12] }
+    ]
+  },
+  {
+    q: "Papier sekolah banyak berakhir di tong sampah. Apa dilakukan?",
+    options: [
+      { text: "Digitalisasi total + tablet", effect: [15, -40, 5, 20] },
+      { text: "Daur ulang kertas internal", effect: [12, -5, 8, 10] },
+      { text: "Kertas daur ulang untuk semua", effect: [10, -8, 5, 8] },
+      { text: "Tidak ada perubahan", effect: [-10, 0, 0, -8] },
+      { text: "Workshop daur ulang siswa", effect: [8, -3, 15, 12] }
+    ]
+  },
+  {
+    q: "Festival lingkungan tahunan digelar. Tema apa?",
+    options: [
+      { text: "Zero Waste Festival", effect: [18, -15, 18, 20] },
+      { text: "Festival Tanam Pohon", effect: [20, -10, 15, 18] },
+      { text: "Eco Art & Innovation", effect: [12, -8, 20, 15] },
+      { text: "Festival biasa tanpa tema", effect: [0, 5, -5, -5] },
+      { text: "Marketplace produk ramah lingkungan", effect: [10, 10, 12, 15] }
+    ]
+  }
+];
+
+function updateUI() {
+  document.getElementById("env").innerText = Math.max(0, Math.min(100, env));
+  document.getElementById("money").innerText = Math.max(0, Math.min(100, money));
+  document.getElementById("happy").innerText = Math.max(0, Math.min(100, happy));
+  document.getElementById("reputation").innerText = Math.max(0, Math.min(100, reputation));
+  
+  const progress = ((step / events.length) * 100);
+  document.getElementById("progress").style.width = progress + "%";
+}
+
+function loadEvent() {
+  if (step >= events.length) {
+    endGame();
+    return;
+  }
+  
+  const event = events[step];
+  document.getElementById("question").innerText = event.q;
+  
+  const optionsContainer = document.getElementById("options");
+  optionsContainer.innerHTML = "";
+  
+  event.options.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = `${index + 1}. ${option.text}`;
+    btn.onclick = () => choose(index);
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function choose(optionIndex) {
+  const event = events[step];
+  const effect = event.options[optionIndex].effect;
+  
+  env += effect[0];
+  money += effect[1];
+  happy += effect[2];
+  reputation += effect[3];
+  
+  // Cek game over dini
+  if (money <= 0 || happy <= 20 || env <= 20) {
+    endGame(true);
+    return;
+  }
+  
+  step++;
+  updateUI();
+  loadEvent();
+}
+
+function endGame(earlyEnd = false) {
+  document.getElementById("gameCard").style.display = "none";
+  const endDiv = document.getElementById("end");
+  endDiv.style.display = "block";
+  
+  let title = "", desc = "", icon = "";
+  
+  if (earlyEnd) {
+    title = "💥 KESEPAKATAN GAGAL!";
+    desc = "Keputusanmu menyebabkan kegagalan dini. Coba strategi yang lebih seimbang!";
+    icon = "💥";
+  } else if (env >= 85 && happy >= 85 && reputation >= 85 && money >= 40) {
+    title = "🏆 SEKOLAH HIJAU EKSELEN!";
+    desc = "Sekolahmu menjadi contoh nasional! Mendapat penghargaan internasional dan dana hibah besar. 🌍✨";
+    icon = "🏆";
+  } else if (env >= 75 && happy >= 75 && reputation >= 75) {
+    title = "🌟 SEKOLAH HIJAU SUKSES!";
+    desc = "Pencapaian luar biasa! Sekolah ramah lingkungan dengan siswa bahagia dan reputasi tinggi! 🎉";
+    icon = "🌟";
+  } else if (env >= 70 && happy >= 70 && reputation >= 70) {
+    title = "✅ SEKOLAH HIJAU LULUS!";
+    desc = "Target tercapai! Sekolahmu sudah ramah lingkungan dan sustainable. Bagus sekali! 👍";
+    icon = "✅";
+  } else if (money >= 80) {
+    title = "💰 SEKOLAH KAYA!";
+    desc = "Dana melimpah tapi lingkungan kurang terjaga. Fokuskan lebih pada sustainability!";
+    icon = "💰";
+  } else {
+    title = "⚠️ PERLU PERBAIKAN";
+    desc = "Ada kemajuan tapi belum optimal. Evaluasi kembali strategi lingkunganmu!";
+    icon = "⚠️";
+  }
+  
+  endDiv.innerHTML = `
+    <div class="ending-icon">${icon}</div>
+    <div class="end-title">${title}</div>
+    <div class="end-desc">${desc}</div>
+    <div style="margin: 20px 0; font-size: 16px;">
+      Final Score:<br>
+      Lingkungan: ${env} | Dana: ${money} | Siswa: ${happy} | Reputasi: ${reputation}
+    </div>
+    <button class="restart-btn" onclick="restartGame()">🔄 Main Lagi</button>
+  `;
+}
+
+function restartGame() {
+  env = 70;
+  money = 70;
+  happy = 70;
+  reputation = 70;
+  step = 0;
+  document.getElementById("end").style.display = "none";
+  document.getElementById("gameCard").style.display = "block";
+  updateUI();
+  loadEvent();
+}
+
+// Inisialisasi
+loadEvent();
+updateUI();
+</script>
+</body>
+</html>
